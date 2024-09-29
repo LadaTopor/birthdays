@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5432/birthdays</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="Remote Birthdays" uuid="f6b282c2-f8a0-4872-bd89-e3506e641330">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://147.45.152.131:5433/birthdays</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

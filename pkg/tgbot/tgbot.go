@@ -1,7 +1,6 @@
 package tgbot
 
 import (
-	"birthdays/repo"
 	"bytes"
 	"database/sql"
 	"encoding/json"
@@ -14,21 +13,22 @@ import (
 	"time"
 
 	"birthdays/cmd/config"
+	"birthdays/repo"
 )
 
 type TgBot struct {
-	log    *logrus.Logger
-	repo   *repo.Repo
-	token  string
-	chatId int64
+	log   *logrus.Logger
+	repo  *repo.Repo
+	token string
+	//chatId int64
 }
 
 func NewTgBot(config *config.Config, logger *logrus.Logger, db *sql.DB) *TgBot {
 	return &TgBot{
-		log:    logger,
-		repo:   repo.NewRepo(db),
-		token:  config.BotToken,
-		chatId: config.ChatId,
+		log:   logger,
+		repo:  repo.NewRepo(db),
+		token: config.BotToken,
+		//chatId: config.ChatId,
 	}
 }
 
@@ -119,7 +119,7 @@ func (tg *TgBot) sendButtonsMessage(chatID int64) error {
 	// Создаем запрос на отправку сообщения с кнопками
 	reqBody, err := json.Marshal(SendMessageRequest{
 		ChatID:      chatID,
-		Text:        "Дни рождения:",
+		Text:        "Выбери действие:",
 		ReplyMarkup: &keyboard,
 	})
 	if err != nil {
@@ -140,69 +140,70 @@ func (tg *TgBot) sendButtonsMessage(chatID int64) error {
 	return nil
 }
 
-// DELETE Функция обработки callback_query (нажатий на кнопки)
-func (tg *TgBot) handleCallbackQuery(query CallbackQuery) {
-	//var serverURL string
-
-	// Определяем, на какую кнопку нажал пользователь
-	if query.Data == "get_birthdays" {
-		list, err := tg.repo.GetListBirthdays()
-		if err != nil {
-			tg.log.Error(err)
-			return
-		}
-		tg.SendMessage(formatBirthdays(list))
-	} else if query.Data == "add_birthday" {
-		// Отправляем сообщение с инструкцией по вводу имени и даты рождения
-		tg.SendMessage("Введите Имя и дату рождения в формате дд.мм.гггг")
-
-		// Устанавливаем состояние для пользователя, что бот ожидает имя и дату
-		userStates[query.From.ID] = "waiting_for_name_and_birthdate"
-		return
-	} else if query.Data == "del_birthday" {
-		//serverURL = "http://localhost:1323/del/birthday"
-	}
-
-	// Отправляем запрос на сервер
-	//err := tg.sendRequestToServer(serverURL)
-	//if err != nil {
-	//	tg.log.Printf("Error sending request to server: %v", err)
-	//	// Отправляем сообщение об ошибке пользователю
-	//	tg.SendMessage("Ошибка при отправке запроса.")
-	//} else {
-	//	// Отправляем успешное сообщение пользователю
-	//	tg.SendMessage("Запрос отправлен успешно.")
-	//}
-
-	// Ответ на callback_query (Telegram требует ответ)
-	tg.answerCallbackQuery(query.ID)
-}
+//
+//// DELETE Функция обработки callback_query (нажатий на кнопки)
+//func (tg *TgBot) handleCallbackQuery(query CallbackQuery) {
+//	//var serverURL string
+//
+//	// Определяем, на какую кнопку нажал пользователь
+//	if query.Data == "get_birthdays" {
+//		list, err := tg.repo.GetListBirthdays()
+//		if err != nil {
+//			tg.log.Error(err)
+//			return
+//		}
+//		tg.SendMessage(formatBirthdays(list))
+//	} else if query.Data == "add_birthday" {
+//		// Отправляем сообщение с инструкцией по вводу имени и даты рождения
+//		tg.SendMessage("Введите Имя и дату рождения в формате дд.мм.гггг")
+//
+//		// Устанавливаем состояние для пользователя, что бот ожидает имя и дату
+//		userStates[query.From.ID] = "waiting_for_name_and_birthdate"
+//		return
+//	} else if query.Data == "del_birthday" {
+//		//serverURL = "http://localhost:1323/del/birthday"
+//	}
+//
+//	// Отправляем запрос на сервер
+//	//err := tg.sendRequestToServer(serverURL)
+//	//if err != nil {
+//	//	tg.log.Printf("Error sending request to server: %v", err)
+//	//	// Отправляем сообщение об ошибке пользователю
+//	//	tg.SendMessage("Ошибка при отправке запроса.")
+//	//} else {
+//	//	// Отправляем успешное сообщение пользователю
+//	//	tg.SendMessage("Запрос отправлен успешно.")
+//	//}
+//
+//	// Ответ на callback_query (Telegram требует ответ)
+//	tg.answerCallbackQuery(query.ID)
+//}
 
 // DELETE Функция для ответа на callback_query
-func (tg *TgBot) answerCallbackQuery(queryID string) {
-	path := fmt.Sprintf("%s%s/answerCallbackQuery", telegramAPI, tg.token)
+//func (tg *TgBot) answerCallbackQuery(queryID string) {
+//	path := fmt.Sprintf("%s%s/answerCallbackQuery", telegramAPI, tg.token)
+//
+//	// Отправляем пустой ответ на callback_query
+//	reqBody := fmt.Sprintf(`{"callback_query_id": "%s"}`, queryID)
+//
+//	resp, err := http.Post(path, "application/json", bytes.NewBuffer([]byte(reqBody)))
+//	if err != nil {
+//		tg.log.Printf("Failed to answer callback query: %v", err)
+//		return
+//	}
+//	defer resp.Body.Close()
+//
+//	if resp.StatusCode != http.StatusOK {
+//		tg.log.Printf("Failed to answer callback query, status: %s", resp.Status)
+//	}
+//}
 
-	// Отправляем пустой ответ на callback_query
-	reqBody := fmt.Sprintf(`{"callback_query_id": "%s"}`, queryID)
-
-	resp, err := http.Post(path, "application/json", bytes.NewBuffer([]byte(reqBody)))
-	if err != nil {
-		tg.log.Printf("Failed to answer callback query: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		tg.log.Printf("Failed to answer callback query, status: %s", resp.Status)
-	}
-}
-
-func (tg *TgBot) SendMessage(message string) {
+func (tg *TgBot) SendMessage(chatId int64, message string) {
 	path := fmt.Sprintf("%s%s/SendMessage", telegramAPI, tg.token)
 
 	tg.log.Println(message)
 	reqBody, err := json.Marshal(SendMessageRequest{
-		ChatID:    tg.chatId,
+		ChatID:    chatId,
 		Text:      message,
 		ParseMode: "Markdown",
 	})
@@ -238,58 +239,64 @@ func (tg *TgBot) handleMessage(message *Message) {
 	case "отмена":
 		userStates[chatID] = ""
 
-		tg.SendMessage("Действие отменено.")
+		tg.SendMessage(chatID, "Действие отменено.")
 		return
 	case "список":
-		list, err := tg.repo.GetListBirthdays()
+		list, err := tg.repo.GetListBirthdays(chatID)
 		if err != nil {
 			tg.log.Error(err)
 			return
 		}
-		tg.SendMessage(formatBirthdays(list))
+		tg.SendMessage(chatID, formatBirthdays(list))
 		return
 	case "добавить":
-		tg.SendMessage("Введите Имя и дату рождения в формате дд.мм\n(или \"Отмена\")")
+		tg.SendMessage(chatID, "Введите имя, фамилию и дату рождения в формате дд.мм.гггг\n(или \"Отмена\")")
 
 		// Устанавливаем состояние для пользователя, что бот ожидает имя и дату
 		userStates[chatID] = "waiting_for_name_and_birthdate"
 		return
 	case "удалить":
-		tg.SendMessage("Введите номер, который хотите удалить")
+		tg.SendMessage(chatID, "Введите номер, который хотите удалить")
 
 		// Устанавливаем состояние для пользователя, что бот ожидает имя и дату
 		userStates[chatID] = "waiting_for_del_birthdate"
 		return
 	}
+
 	// Если бот ожидает имя и дату рождения
 	switch userState {
 	case "waiting_for_name_and_birthdate":
 		// Проверяем формат даты рождения (дд.мм.гггг)
 		parts := strings.Split(message.Text, " ")
-		if len(parts) != 2 {
-			tg.SendMessage("Неправильный формат. Введите Имя и дату рождения в формате дд.мм")
+		if len(parts) != 3 {
+			tg.SendMessage(chatID, "Неправильный формат. Должно быть: \"Фамилия Имя дд.мм.гггг\"")
 			return
 		}
 
 		name := parts[0]
-		birthdate := parts[1]
+		surname := parts[1]
+		birthdate := parts[2]
+
+		fullname := fmt.Sprintf("%s %s", name, surname)
 
 		// Пример валидации даты (более сложную валидацию можно добавить)
-		if len(birthdate) != 5 || birthdate[2] != '.' {
-			tg.SendMessage("Неправильный формат даты. Введите дату в формате дд.мм")
+		if len(birthdate) < 8 {
+			tg.SendMessage(chatID, "Неправильный формат даты. Должно быть: \"Фамилия Имя дд.мм.гггг\"")
 			return
+		} else if len(birthdate) == 9 {
+			birthdate = "0" + birthdate
 		}
 
 		// Сохраняем данные пользователя (здесь можно отправить их на сервер или в базу данных)
-		tg.log.Printf("Пользователь ввёл: Имя - %s, Дата рождения - %s", name, birthdate)
-		err := tg.repo.AddNewBirthday(name, birthdate)
+		tg.log.Printf("Пользователь ввёл: Имя - %s, Дата рождения - %s", fullname, birthdate)
+		err := tg.repo.AddNewBirthday(fullname, birthdate, chatID)
 		if err != nil {
 			tg.log.Error(err)
 			return
 		}
 
 		// Отправляем сообщение с подтверждением
-		tg.SendMessage(fmt.Sprintf("Сохранено: Имя - %s, Дата рождения - %s", name, birthdate))
+		tg.SendMessage(chatID, fmt.Sprintf("Сохранено: Имя - %s, Дата рождения - %s", fullname, birthdate))
 
 		// Сбрасываем состояние пользователя
 		userStates[chatID] = ""
@@ -297,21 +304,22 @@ func (tg *TgBot) handleMessage(message *Message) {
 	case "waiting_for_del_birthdate":
 		id, err := strconv.Atoi(message.Text)
 		if err != nil {
-			tg.SendMessage("Введен неверный Id!")
+			tg.SendMessage(chatID, "Введен неверный Id!")
 			return
 		}
-		err = tg.repo.DeleteBirthday(id)
+		err = tg.repo.DeleteBirthday(id, chatID)
 		if err != nil {
 			tg.log.Error(err)
-			tg.SendMessage("Такого id не существует!")
+			tg.SendMessage(chatID, "Такого id не существует!")
 			return
 		}
-		tg.SendMessage(fmt.Sprintf("№%d удален", id))
+		tg.SendMessage(chatID, fmt.Sprintf("№%d удален", id))
+		userStates[chatID] = ""
 		return
 	}
 
 	// Если состояние не определено, отправляем стандартное сообщение
-	tg.SendMessage("Используйте /start для начала.")
+	tg.SendMessage(chatID, "Используйте /start для начала.")
 }
 
 func (tg *TgBot) getUpdates(offset int) ([]Update, error) {

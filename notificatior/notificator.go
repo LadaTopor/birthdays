@@ -30,8 +30,8 @@ func (nf *Notificator) Go() {
 	go nf.tgBot.Start()
 
 	// Добавляем задачу, которая будет выполняться каждый день в 9 утра
-	_, err := nf.cron.AddFunc("0 8 * * *", func() {
-		birthdays, err := nf.db.GetListBirthdays()
+	_, err := nf.cron.AddFunc("0 17 * * *", func() {
+		birthdays, err := nf.db.GetAllOfListBirthdays()
 		if err != nil {
 
 			nf.log.Printf("Ошибка при получении пользователей: %v", err)
@@ -50,18 +50,21 @@ func (nf *Notificator) Go() {
 }
 
 func (nf *Notificator) checkBirthdays(birthdays []repo.Birthday) {
-	deltaDate := time.Now().AddDate(0, 0, 5)
-	fmt.Println(deltaDate)
+	now := time.Now().Truncate(24 * time.Hour)
+	deltaDate := now.AddDate(0, 0, 6)
+	location, _ := time.LoadLocation("Europe/Moscow")
 
 	for _, item := range birthdays {
-		date, err := time.Parse("02.01.2006", fmt.Sprintf("%s.%d", item.Birthdate, time.Now().Year()))
+		date, err := time.Parse("02.01.2006", fmt.Sprintf("%s.%d", item.Birthdate[:len(item.Birthdate)-5], time.Now().Year()))
 		if err != nil {
 			nf.log.Error(err)
 		}
-		fmt.Println(date)
 
-		if deltaDate.After(date) || date.Equal(deltaDate) {
-			nf.tgBot.SendMessage(fmt.Sprintf("У *%s* скоро день рождения! *%d %s*", item.FullName, date.Day(), date.Month().String()))
+		date = time.Date(date.Year(), date.Month(), date.Day(), 3, 0, 0, 0, location)
+		if time.Now().Truncate(24 * time.Hour).Equal(date) {
+			nf.tgBot.SendMessage(item.ChatId, fmt.Sprintf("У *%s* cегодня день рождения! (*%s*)\nНе забудь поздравить.", item.FullName, item.Birthdate))
+		} else if date.After(now) && date.Before(deltaDate) {
+			nf.tgBot.SendMessage(item.ChatId, fmt.Sprintf("У *%s* скоро день рождения! *%s*", item.FullName, item.Birthdate))
 		}
 	}
 }
