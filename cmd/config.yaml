@@ -1,0 +1,9 @@
+POSTGRES_DB: birthdays
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: asdfg
+PORT: 5432
+HOST: localhost
+
+botToken: "7552077241:AAFrXyy8RtbvVXv2BA7JL_Hk2ndCX1L0cOs"
+chatId: 464265014
+
